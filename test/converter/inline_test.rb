@@ -2,7 +2,7 @@
 
 require_relative '../test_helper'
 
-class NotationInlineTest < Minitest::Unit::TestCase
+class NotationInlineTest < Minitest::Test
   def convert(body)
     Pukiwiki2growi::Converter.convert_page(body, nil)
   end
