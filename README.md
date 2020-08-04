@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.com/netsugo/pukiwiki2growi.svg?branch=master)](https://travis-ci.com/netsugo/pukiwiki2growi)
+[![codecov](https://codecov.io/gh/netsugo/pukiwiki2growi/branch/master/graph/badge.svg)](https://codecov.io/gh/netsugo/pukiwiki2growi)
 
 
 # Pukiwiki2growi
