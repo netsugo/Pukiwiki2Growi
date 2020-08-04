@@ -209,6 +209,30 @@ module Pukiwiki2growi
               .gsub('&br;', "  \n")
         end
 
+        def decorate(pat, head_size, tail_size, handlers, text)
+          handlers.each do |n, text_handler|
+            if head_size >= n && tail_size >= n
+              return [
+                pat * (head_size - n),
+                text_handler.call(text),
+                pat * (tail_size - n)
+              ].join
+            end
+          end
+
+          text
+        end
+
+        def line_decoration(pat, handlers, line)
+          line.gsub(/(#{pat}{2,})(.*?)(#{pat}{2,})/) do
+            head = Regexp.last_match(1)
+            text = Regexp.last_match(2)
+            tail = Regexp.last_match(3)
+
+            decorate(pat, head.size, tail.size, handlers, text)
+          end.lstrip
+        end
+
         def em_strong(line)
           line.gsub(/(''+)([^'].*?)(''+)/) do
             head = Regexp.last_match(1)
@@ -228,21 +252,11 @@ module Pukiwiki2growi
 
         # strike
         def text_line(line)
-          line.gsub(/(%{2,})([^%].*?)(%{2,})/) do
-            head = Regexp.last_match(1)
-            text = Regexp.last_match(2)
-            tail = Regexp.last_match(3)
+          handlers = {
+            2 => ->(text) { " ~~#{text.strip}~~ " }
+          }
 
-            [[2, 2]].each do |k, v|
-              if head.size >= k && tail.size >= k
-                return [
-                  '%' * (head.size - k),
-                  ' ', '~' * v, text.strip, '~' * v, ' ',
-                  '%' * (tail.size - k)
-                ].join
-              end
-            end
-          end.lstrip
+          line_decoration('%', handlers, line)
         end
 
         def footnote(line)
