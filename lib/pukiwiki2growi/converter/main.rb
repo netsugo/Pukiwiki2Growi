@@ -234,20 +234,13 @@ module Pukiwiki2growi
         end
 
         def em_strong(line)
-          line.gsub(/(''+)([^'].*?)(''+)/) do
-            head = Regexp.last_match(1)
-            text = Regexp.last_match(2)
-            tail = Regexp.last_match(3)
-            [[5, 3], [3, 1], [2, 2]].each do |k, v|
-              if head.size >= k && tail.size >= k
-                return [
-                  "'" * (head.size - k),
-                  ' ', '*' * v, text.strip, '*' * v, ' ',
-                  "'" * (tail.size - k)
-                ].join.lstrip
-              end
-            end
-          end
+          handlers = {
+            5 => ->(text) { " ***#{text.strip}*** " },
+            3 => ->(text) { " *#{text.strip}* " },
+            2 => ->(text) { " **#{text.strip}** " }
+          }
+
+          line_decoration("'", handlers, line)
         end
 
         # strike

@@ -32,6 +32,7 @@ class NotationInlineTest < Minitest::Unit::TestCase
       "''strong''" => '**strong** ',
       "'''em1'''" => '*em1* ',
       "'''em2'em2'''" => "*em2'em2* ",
+      "em3'''em3'''em3" => 'em3 *em3* em3',
       "'''''emstrong'''''" => '***emstrong*** ',
       "'''''''emstrong''''''''" => "'' ***emstrong*** '''"
     }
