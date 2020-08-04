@@ -92,8 +92,27 @@ class NotationBlockTest < Minitest::Unit::TestCase
     testcase.each { |origin, expect| assert_equal expect, convert(origin) }
   end
 
+  def div_align(pos, body)
+    header = "<div style=\"text-align:#{pos}\">"
+    element = body.split("\n", -1).map { |s| "#{' ' * 4}#{s}" }.join("\n")
+    footer = '</div>'
+    [header, element, footer].join("\n")
+  end
+
   def test_align
-    assert false
+    testcase = {
+      'LEFT:test1L' => div_align('left', 'test1L'),
+      'CENTER:test1C' => div_align('center', 'test1C'),
+      'RIGHT:test1R' => div_align('right', 'test1R'),
+      "LEFT:test2\ntest2" => div_align('left', "test2\ntest2"),
+      "LEFT:test3\ntest3\n" => div_align('left', "test3\ntest3\n"),
+      "CENTER:test4\nCENTER:test4" => [div_align('center', 'test4'), div_align('center', 'test4')].join("\n"),
+      'LLEFT:test5' => 'LLEFT:test5',
+      "LEFT:test6\n\n" => "#{div_align('left', 'test6')}\n\n",
+      "LEFT:test7\n\ntest7" => "#{div_align('left', 'test7')}\n\ntest7"
+    }
+
+    testcase.each { |origin, expect| assert_equal expect, convert(origin) }
   end
 
   def test_hr_normal

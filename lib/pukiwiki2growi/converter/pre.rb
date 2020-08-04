@@ -178,9 +178,27 @@ module Pukiwiki2growi
           end
         end
 
+        def div_style(key, value, element)
+          header = "<div style=\"#{key}:#{value}\">"
+          footer = '</div>'
+          [header, element, footer].join("\n")
+        end
+
+        # LEFT:...
+        # CENTER:...
+        # RIGHT:...
+        def text_align(body)
+          body.gsub(/^(LEFT|CENTER|RIGHT):((.*)(\n(?!(LEFT:|RIGHT:|CENTER:|[~><\-\+: \n])).*)*)/) do
+            align = Regexp.last_match(1).downcase
+            element = Regexp.last_match(2)
+            div_style('text-align', align, element)
+          end
+        end
+
         def exec(body)
           body = convert_preformat(body)
           body = convert_table_csv(body)
+          body = text_align(body)
           body
         end
       end

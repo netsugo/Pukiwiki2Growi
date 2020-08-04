@@ -14,22 +14,13 @@ module Pukiwiki2growi
         end
       end
 
-      def div_style(key, value, element)
-        header = "<div style=\"#{key}:#{value}\">"
-        tab = ' ' * 4
-        body = element.split("\n", -1).map { |s| "#{tab}#{s}" }
-        footer = '</div>'
-        [header].concat(body).concat([footer, '']).join("\n")
-      end
-
-      # LEFT:...
-      # CENTER:...
-      # RIGHT:...
-      def text_align(body)
-        body.gsub(/(LEFT|CENTER|RIGHT)(:)(.*?)(\n\n)/) do
-          align = Regexp.last_match(1).downcase
-          element = Regexp.last_match(3)
-          div_style('text-align', align, element)
+      def fix_div_style(body)
+        body.gsub(%r{(<div style=.*?)((\n.*)*?)(\n</div>)}) do
+          header = Regexp.last_match(1)
+          content = Regexp.last_match(2)
+          footer = Regexp.last_match(4)
+          lines = content.gsub("\n") { "\n#{' ' * 4}" }
+          [header, lines, footer].join
         end
       end
 
@@ -58,7 +49,7 @@ module Pukiwiki2growi
 
       def exec(body)
         body = fix_table_csv(body)
-        body = text_align(body) # ?
+        body = fix_div_style(body)
         body = alt_decoration(body) # ?
         body
       end
