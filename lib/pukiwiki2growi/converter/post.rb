@@ -24,33 +24,9 @@ module Pukiwiki2growi
         end
       end
 
-      def span_style(key, value, element)
-        header = "<span style=\"#{key}:#{value}\">"
-        footer = '</span>'
-        [header, element, footer].join
-      end
-
-      # COLOR(color){inline}
-      # SIZE(size){inline}
-      # See pukiwiki/default.ini.php
-      def alt_decoration(line)
-        { 'COLOR' => 'color', 'SIZE' => 'font-size' }.each do |k, name|
-          [/#{k}\(([^\(\)]*)\){([^}]*)}/, /#{k}\(([^\(\)]*)\):((?:(?!COLOR\([^\)]+\)\:).)*)/].each do |regex|
-            line.gsub!(regex) do
-              value = Regexp.last_match(1)
-              value << 'px' if k == 'SIZE'
-              element = Regexp.last_match(2)
-              span_style(name, value, element)
-            end
-          end
-        end
-        line
-      end
-
       def exec(body)
         body = fix_table_csv(body)
         body = fix_div_style(body)
-        body = alt_decoration(body) # ?
         body
       end
     end

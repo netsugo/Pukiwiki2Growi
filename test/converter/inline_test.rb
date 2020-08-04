@@ -72,6 +72,7 @@ class NotationInlineTest < Minitest::Unit::TestCase
 
   def test_alt_decorate
     testcase = {
+      ' COLOR(red){RED}' => "```\nCOLOR(red){RED}\n```",
       'COLOR(red){RED}' => spcolor('red', 'RED'),
       'SIZE(20){20PX}' => spsize('20px', '20PX'),
       'SIZE(20){COLOR(red){RED20}}' => spsize('20px', spcolor('red', 'RED20')),
