@@ -4,13 +4,19 @@ module Pukiwiki2growi
   module Converter
     module Main
       module Block
-        class Empty
+        class Notation
+          def convert(line)
+            Inline.exec(line)
+          end
+        end
+
+        class Empty < Notation
           def to_s
             ''
           end
         end
 
-        class MultiLine
+        class MultiLine < Notation
           def initialize
             @lines = []
           end
@@ -31,7 +37,7 @@ module Pukiwiki2growi
           end
 
           def to_s
-            @lines.join("\n")
+            @lines.map { |s| convert(s) }.join("\n")
           end
         end
 
@@ -41,6 +47,10 @@ module Pukiwiki2growi
         class PreFormatted < MultiLine
           def to_element(line)
             line[1, line.size]
+          end
+
+          def convert(line)
+            line
           end
 
           def to_s
@@ -58,18 +68,18 @@ module Pukiwiki2growi
           end
         end
 
-        class Quote
+        class Quote < Notation
           # TODO: implement
         end
 
-        class BQuote
+        class BQuote < Notation
           # TODO: implement
         end
 
-        class Heading
+        class Heading < Notation
           def initialize(level, element)
             @level = level
-            @element = element
+            @element = convert(element)
             @replace = '#'
           end
 
@@ -116,7 +126,7 @@ module Pukiwiki2growi
           end
         end
 
-        class Horizontal
+        class Horizontal < Notation
           def to_s
             '_' * 4
           end
@@ -216,22 +226,38 @@ module Pukiwiki2growi
           end
         end
 
+        # strike
+        def text_line(line)
+          line.gsub(/(%{2,})([^%].*?)(%{2,})/) do
+            head = Regexp.last_match(1)
+            text = Regexp.last_match(2)
+            tail = Regexp.last_match(3)
+
+            [[2, 2]].each do |k, v|
+              if head.size >= k && tail.size >= k
+                return [
+                  '%' * (head.size - k),
+                  ' ', '~' * v, text.strip, '~' * v, ' ',
+                  '%' * (tail.size - k)
+                ].join
+              end
+            end
+          end.lstrip
+        end
+
         def footnote(line)
           # TODO: implement
           line
         end
 
-        def exec(body)
-          body.split("\n", -1).map do |line|
-            unless line.start_with?(' ')
-              line = Misc.comment(line)
-              line = Misc.del_hash(line)
-              line = br(line)
-              line = em_strong(line)
-              line = footnote(line)
-            end
-            line
-          end.join("\n")
+        def exec(line)
+          line = Misc.comment(line)
+          line = Misc.del_hash(line)
+          line = em_strong(line)
+          line = text_line(line)
+          line = footnote(line)
+          line = br(line)
+          line
         end
       end
 
@@ -250,9 +276,7 @@ module Pukiwiki2growi
       module_function
 
       def exec(body)
-        body = Inline.exec(body)
-        body = Block.exec(body)
-        body
+        Block.exec(body)
       end
     end
   end

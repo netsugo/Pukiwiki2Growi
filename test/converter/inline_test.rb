@@ -112,13 +112,14 @@ class NotationInlineTest < Minitest::Unit::TestCase
 
   def test_strike
     testcase = {
-      '%%test%%' => '~~test~~',
-      '%%%test%%%' => nil, # underline???
-      '%%%%%test%%%%%' => nil
+      '%%test1%%' => '~~test1~~ ',
+      '%%test2%test2%%' => '~~test2%test2~~ ',
+      'test3%%test3%%test3' => 'test3 ~~test3~~ test3'
+      # '%%%test%%%' => nil, # underline?
+      # '%%%%%test%%%%%' => nil # underline and strike>
     }
 
-    #testcase.each { |origin, expect| assert_equal expect, convert(origin) }
-    assert false
+    testcase.each { |origin, expect| assert_equal expect, convert(origin) }
   end
 
   def test_footnote
