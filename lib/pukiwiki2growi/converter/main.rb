@@ -9,6 +9,7 @@ module Pukiwiki2growi
             ''
           end
         end
+
         class MultiLine
           def initialize
             @lines = []
@@ -33,8 +34,10 @@ module Pukiwiki2growi
             @lines.join("\n")
           end
         end
+
         class Paragraph < MultiLine
         end
+
         class PreFormatted < MultiLine
           def to_element(line)
             line[1, line.size]
@@ -44,6 +47,7 @@ module Pukiwiki2growi
             ['```', super, '```'].join("\n")
           end
         end
+
         class Table < MultiLine
           def to_s
             count = 0
@@ -53,12 +57,15 @@ module Pukiwiki2growi
             [header, middle, super].join("\n")
           end
         end
+
         class Quote
           # TODO: implement
         end
+
         class BQuote
           # TODO: implement
         end
+
         class Heading
           def initialize(level, element)
             @level = level
@@ -81,6 +88,7 @@ module Pukiwiki2growi
             [@replace * @level, ' ', element].join
           end
         end
+
         class UList < Heading
           def initialize(level, element)
             super(level, element)
@@ -96,6 +104,7 @@ module Pukiwiki2growi
             [@padding * (@level - 1), @replace, ' ', @element].join
           end
         end
+
         class OList < UList
           def initialize(level, element)
             super(level, element)
@@ -106,11 +115,13 @@ module Pukiwiki2growi
             _create(line, '+')
           end
         end
+
         class Horizontal
           def to_s
             '_' * 4
           end
         end
+
         class Page
           def initialize
             @list = []
@@ -177,6 +188,7 @@ module Pukiwiki2growi
           page.to_s
         end
       end
+
       module Inline
         module_function
 
@@ -212,6 +224,8 @@ module Pukiwiki2growi
         def exec(body)
           body.split("\n", -1).map do |line|
             unless line.start_with?(' ')
+              line = Misc.comment(line)
+              line = Misc.del_hash(line)
               line = br(line)
               line = em_strong(line)
               line = footnote(line)
@@ -220,6 +234,7 @@ module Pukiwiki2growi
           end.join("\n")
         end
       end
+
       module Misc
         module_function
 
@@ -230,22 +245,11 @@ module Pukiwiki2growi
         def del_hash(line)
           line.gsub(/\[#[0-9a-z]+?\]/, '')
         end
-
-        def exec(body)
-          body.split("\n", -1).map do |line|
-            unless line.start_with?(' ')
-              line = comment(line)
-              line = del_hash(line)
-            end
-            line
-          end.join("\n")
-        end
       end
 
       module_function
 
       def exec(body)
-        body = Misc.exec(body)
         body = Inline.exec(body)
         body = Block.exec(body)
         body
