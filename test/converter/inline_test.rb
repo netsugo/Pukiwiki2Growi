@@ -60,7 +60,7 @@ class NotationInlineTest < Minitest::Unit::TestCase
     testcase.each { |origin, expect| assert_equal expect, convert(origin) }
   end
 
-  def test_color1
+  def test_color
     testcase = {
       '&color(red){test};' => spcolor('red', 'test'),
       '&color(red,black){test};' => spstyle({ 'color' => 'red', 'bgcolor' => 'black' }, 'test'),
@@ -70,15 +70,41 @@ class NotationInlineTest < Minitest::Unit::TestCase
     testcase.each { |origin, expect| assert_equal expect, convert(origin) }
   end
 
-  def test_alt_decorate
+  def test_size_color
+    testcase = {
+      '&color(red){&size(20){RED20};};' => spcolor('red', spsize('20px', 'RED20'))
+    }
+
+    testcase.each { |origin, expect| assert_equal expect, convert(origin) }
+  end
+
+  def test_alt_decorate1
     testcase = {
       ' COLOR(red){RED}' => "```\nCOLOR(red){RED}\n```",
       'COLOR(red){RED}' => spcolor('red', 'RED'),
-      'SIZE(20){20PX}' => spsize('20px', '20PX'),
+      'SIZE(20){20PX}' => spsize('20px', '20PX')
+    }
+
+    testcase.each { |origin, expect| assert_equal expect, convert(origin) }
+  end
+
+  def test_alt_decorate2
+    testcase = {
       'SIZE(20){COLOR(red){RED20}}' => spsize('20px', spcolor('red', 'RED20')),
       'COLOR(red){SIZE(20){RED20}}' => spcolor('red', spsize('20px', 'RED20')),
       'SIZE(20){COLOR(red){RED20}COLOR(blue){BLUE20}}' => spsize('20px', "#{spcolor('red', 'RED20')}#{spcolor('blue', 'BLUE20')}"),
-      'COLOR(red){SIZE(20){RED20}SIZE(25){RED25}}' => spcolor('red', "#{spsize('20px', 'RED20')}SIZE(25){RED25") + '}',
+      'COLOR(red){SIZE(20){RED20}SIZE(25){RED25}}' => spcolor('red', "#{spsize('20px', 'RED20')}SIZE(25){RED25") + '}'
+    }
+
+    testcase.each { |origin, expect| assert_equal expect, convert(origin) }
+  end
+
+  def test_alt_decorate3
+    testcase = {
+      'COLOR(red){RED&size(20){RED20};&size(20){RED20};}' => spcolor('red', "RED#{spsize('20px', 'RED20')}#{spsize('20px', 'RED20')}"),
+      'SIZE(20){20PX&color(red){RED20};&color(red){RED20};}' => spsize('20px', "20PX#{spcolor('red', 'RED20')}#{spcolor('red', 'RED20')}"),
+      '&color(red){REDSIZE(20){RED20}};' => spcolor('red', "RED#{spsize('20px', 'RED20')}"),
+      '&size(20){20PXCOLOR(red){RED20}};' => spsize('20px', "20PX#{spcolor('red', 'RED20')}")
     }
 
     testcase.each { |origin, expect| assert_equal expect, convert(origin) }
@@ -119,7 +145,7 @@ class NotationInlineTest < Minitest::Unit::TestCase
   def test_link
     assert false
   end
-  
+
   def test_comment
     testcase = {
       '//line' => '<!--line-->'
@@ -132,4 +158,3 @@ class NotationInlineTest < Minitest::Unit::TestCase
     assert false
   end
 end
-
