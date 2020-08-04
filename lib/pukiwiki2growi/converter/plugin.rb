@@ -30,7 +30,7 @@ module Pukiwiki2growi
       end
 
       def inline(mapping, line)
-        regex = /&([0-9a-zA-Z_]+)(\(([^\n]+?)\)({([^\n]+)})?)?;/
+        regex = /&([0-9a-zA-Z_]+)(\(([^\n]+?)\)({([^\n]+?)})?)?;/
         line.gsub(regex) do
           name = Regexp.last_match(1)&.downcase
           args = Regexp.last_match(3)&.split(',')&.map(&:strip)
