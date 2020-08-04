@@ -8,9 +8,9 @@ module Pukiwiki2growi
       def fix_table_csv(body)
         body.gsub(/(:::csv)((\n,.*)*)(\n:::)/) do
           header = Regexp.last_match(1)
-          ctable = Regexp.last_match(2).gsub("\n,", "\n")
+          content = Regexp.last_match(2)
           footer = Regexp.last_match(4)
-          [header, ctable, footer].join
+          [header, content.gsub("\n,", "\n"), footer].join
         end
       end
 
@@ -19,7 +19,7 @@ module Pukiwiki2growi
           header = Regexp.last_match(1)
           content = Regexp.last_match(2)
           footer = Regexp.last_match(4)
-          lines = content.gsub("\n") { "\n#{' ' * 4}" }
+          lines = content.gsub("\n", "\n#{' ' * 4}")
           [header, lines, footer].join
         end
       end

@@ -77,9 +77,16 @@ class NotationBlockTest < Minitest::Unit::TestCase
     assert_equal expect, actual
   end
 
-  def test_csv_normal
+  def test_csv_normal1
     origin = [',aa,aa,aa', ', bb, bb, bb', ', cc , cc , cc '].join("\n")
-    expect = [':::csv', 'aa,aa,aa', ' bb, bb, bb', ' cc , cc , cc '].join("\n")
+    expect = [':::csv', 'aa,aa,aa', ' bb, bb, bb', ' cc , cc , cc ', ':::'].join("\n")
+    actual = convert(origin)
+    assert_equal expect, actual
+  end
+
+  def test_csv_normal2
+    origin = [',test2,test2'].join("\n")
+    expect = [':::csv', 'test2,test2', ':::'].join("\n")
     actual = convert(origin)
     assert_equal expect, actual
   end
