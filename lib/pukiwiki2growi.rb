@@ -1,4 +1,7 @@
-require "pukiwiki2growi/version"
+# frozen_string_literal: true
+
+require 'pukiwiki2growi/version'
+require 'pukiwiki2growi/converter'
 
 module Pukiwiki2growi
   class Error < StandardError; end
