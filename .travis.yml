@@ -5,4 +5,4 @@ rvm:
   - 2.7.1
 before_install: gem install bundler -v 2.1.4
 after_success:
-  - codecov
+  - bash <(curl -s https://codecov.io/bash)
