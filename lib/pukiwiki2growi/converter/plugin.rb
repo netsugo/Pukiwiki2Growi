@@ -29,18 +29,24 @@ module Pukiwiki2growi
         end
       end
 
-      def inline(mapping, line)
-        regex = /&([0-9a-zA-Z_]+)(\(([^\n]+?)\)({([^\n]+?)})?)?;/
+      # circular recursion
+      # &plugin(args){&plugin(args){inline};&plugin(args);};
+      def inline_rec_short(mapping, line)
+        regex = /(?:&([0-9a-zA-Z_]+)(?:\(([^\)]+)\))?(?:{(.+)})?;)/
         line.gsub(regex) do
           name = Regexp.last_match(1)&.downcase
-          args = Regexp.last_match(3)&.split(',')&.map(&:strip)
-          pre_inline = Regexp.last_match(5)
-          inline = if pre_inline.nil? || pre_inline.scan(regex).empty?
-                     pre_inline
-                   else
-                     inline(mapping, pre_inline)
-                   end
+          args = Regexp.last_match(2)&.split(',')&.map(&:strip)
+          pre_inline = Regexp.last_match(3)
+          inline = pre_inline.nil? ? pre_inline : inline(mapping, pre_inline)
           mapping[name]&.call(args, inline) || unknown_inline(name, args, inline)
+        end
+      end
+
+      # &plugin(args){inline};&plugin(args){inline};
+      def inline(mapping, line)
+        regex = /(?:&([0-9a-zA-Z_]+)(?:\(([^\)]+)\))?(?:{((?:\g<0>|.)*?)})?;)/
+        line.gsub(regex) do
+          inline_rec_short(mapping, Regexp.last_match(0))
         end
       end
     end

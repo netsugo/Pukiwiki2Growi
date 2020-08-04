@@ -55,7 +55,8 @@ class NotationInlineTest < Minitest::Unit::TestCase
 
   def test_size
     testcase = {
-      '&size(20){test};' => spsize('20px', 'test')
+      '&size(20){test};' => spsize('20px', 'test'),
+      '&size(20){test};&size(20){test};' => "#{spsize('20px', 'test')}#{spsize('20px', 'test')}"
     }
 
     testcase.each { |origin, expect| assert_equal expect, convert(origin) }
