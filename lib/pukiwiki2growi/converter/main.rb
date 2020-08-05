@@ -68,14 +68,6 @@ module Pukiwiki2growi
           end
         end
 
-        class Quote < Notation
-          # TODO: implement
-        end
-
-        class BQuote < Notation
-          # TODO: implement
-        end
-
         class Heading < Notation
           def initialize(level, element)
             @level = level
@@ -95,7 +87,34 @@ module Pukiwiki2growi
           end
 
           def to_s
-            [@replace * @level, ' ', element].join
+            [@replace * @level, ' ', @element].join
+          end
+        end
+
+        # it doesn't look itself's forward/back quotation
+        class Quote < Heading
+          def initialize(level, element)
+            super(level, element)
+            @replace = '>'
+          end
+
+          def self.create(line)
+            _create(line, '>')
+          end
+        end
+
+        class BQuote < Quote
+          def self.create(line)
+            _create(line, '<')
+          end
+
+          def to_s
+            level = @level - 1
+            if level < 1
+              @element
+            else
+              [@replace * level, ' ', @element].join
+            end
           end
         end
 
@@ -168,8 +187,8 @@ module Pukiwiki2growi
           def mapping
             {
               '~' => ->(line) { push_paragraph(line, line != '~') },
-              '>' => nil,
-              '<' => nil,
+              '>' => ->(line) { @list.push(Quote.create(line)) },
+              '<' => ->(line) { @list.push(BQuote.create(line)) },
               '-' => ->(line) { @list.push(line.start_with?('----') ? Horizontal.new : UList.create(line)) },
               '+' => ->(line) { @list.push(OList.create(line)) },
               ' ' => ->(line) { push_preformatted(line) },

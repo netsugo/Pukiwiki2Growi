@@ -38,7 +38,18 @@ class NotationBlockTest < Minitest::Test
   end
 
   def test_quote
-    assert false
+    testcase = {
+      '>testQ1' => '> testQ1',
+      '>>testQ2' => '>> testQ2',
+      '>>>testQ3' => '>>> testQ3',
+      '>>>>testQ4' => '>>> >testQ4',
+      '<testB1' => 'testB1',
+      '<<testB2' => '> testB2',
+      '<<<testB3' => '>> testB3',
+      '<<<<testB4' => '>> <testB4'
+    }
+
+    testcase.each { |origin, expect| assert_equal expect, convert(origin) }
   end
 
   def test_ul
