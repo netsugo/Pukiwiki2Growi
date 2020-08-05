@@ -10,9 +10,9 @@ module Pukiwiki2growi
     module_function
 
     def convert_page(body, _wiki_root)
-      body = Pre.exec(body)
+      body = Pre::Body.exec(body)
       body = Main.exec(body)
-      body = Post.exec(body)
+      body = Post::Block.exec(body)
       body
     end
   end

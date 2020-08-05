@@ -241,18 +241,6 @@ module Pukiwiki2growi
           line
         end
       end
-
-      module_function
-
-      def exec(body)
-        Body.exec(body).split("\n", -1).map do |line|
-          if line.start_with?(' ')
-            line
-          else
-            Line.exec(line)
-          end
-        end.join("\n")
-      end
     end
   end
 end

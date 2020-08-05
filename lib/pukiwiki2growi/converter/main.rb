@@ -6,7 +6,9 @@ module Pukiwiki2growi
       module Block
         class Notation
           def convert(line)
-            Inline.exec(line)
+            line = Pukiwiki2growi::Converter::Pre::Line.exec(line)
+            line = Inline.exec(line)
+            line
           end
         end
 
@@ -184,11 +186,20 @@ module Pukiwiki2growi
             end
           end
 
+          def push_bquote(line)
+            ignore_regex = %r{^<(div style=".*?:.*?"|/div)>}
+            if line.match(ignore_regex)
+              push_paragraph(line)
+            else
+              @list.push(BQuote.create(line))
+            end
+          end
+
           def mapping
             {
               '~' => ->(line) { push_paragraph(line, line != '~') },
               '>' => ->(line) { @list.push(Quote.create(line)) },
-              '<' => ->(line) { @list.push(BQuote.create(line)) },
+              '<' => ->(line) { push_bquote(line) },
               '-' => ->(line) { @list.push(line.start_with?('----') ? Horizontal.new : UList.create(line)) },
               '+' => ->(line) { @list.push(OList.create(line)) },
               ' ' => ->(line) { push_preformatted(line) },
