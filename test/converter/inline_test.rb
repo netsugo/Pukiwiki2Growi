@@ -11,8 +11,12 @@ class NotationInlineTest < Minitest::Test
 
   def test_br_normal
     testcase = {
-      '~' => '',
-      'test~' => 'test  '
+      '~' => '  ',
+      'test1~' => 'test1  ',
+      "test2~\ntest2" => "test2  \ntest2",
+      "test3\n~\ntest3" => "test3\n  \ntest3",
+      "test4\n~\n~\ntest4" => "test4\n  \n  \ntest4",
+      "test5\nte~\nte~\nte~\ntest5" => "test5\nte  \nte  \nte  \ntest5"
     }
 
     testcase.each { |origin, expect| assert_equal expect, convert(origin) }

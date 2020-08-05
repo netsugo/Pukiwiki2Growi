@@ -167,7 +167,7 @@ module Pukiwiki2growi
 
           def mapping
             {
-              '~' => ->(line) { push_paragraph(line, true) },
+              '~' => ->(line) { push_paragraph(line, line != '~') },
               '>' => nil,
               '<' => nil,
               '-' => ->(line) { @list.push(line.start_with?('----') ? Horizontal.new : UList.create(line)) },
@@ -203,8 +203,7 @@ module Pukiwiki2growi
         module_function
 
         def br(line)
-          line.gsub(/^~$/, '')
-              .gsub(/~$/, ' ' * 2)
+          line.gsub(/~$/, ' ' * 2)
               .gsub('&br;&br;', "\n\n")
               .gsub('&br;', "  \n")
         end

@@ -10,7 +10,7 @@ class NotationBlockTest < Minitest::Test
   def test_paragraph1
     testcase = {
       'test' => 'test',
-      '~' => '' # see breakline
+      '~' => '  ' # see breakline
     }
 
     testcase.each { |origin, expect| assert_equal expect, convert(origin) }
