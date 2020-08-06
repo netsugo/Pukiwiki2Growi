@@ -231,7 +231,8 @@ module Pukiwiki2growi
               '-' => ->(line) { @list.push(line.start_with?('----') ? Horizontal.new : UList.create(line)) },
               '+' => ->(line) { @list.push(OList.create(line)) },
               ' ' => ->(line) { push_preformatted(line) },
-              '|' => ->(line) { push_table(line) }
+              '|' => ->(line) { push_table(line) },
+              '*' => ->(line) { @list.push(Heading.create(line)) }
             }
           end
 

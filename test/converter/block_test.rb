@@ -102,6 +102,17 @@ class NotationBlockTest < Minitest::Test
     assert_equal expect, actual
   end
 
+  def test_heading
+    testcase = {
+      '*test1' => '# test1',
+      '**test1' => '## test1',
+      '***test1' => '### test1',
+      '****test1' => '### *test1'
+    }
+
+    testcase.each { |origin, expect| assert_equal expect, convert(origin) }
+  end
+
   def test_toc
     testcase = {
       '#contents' => '@[toc]'
