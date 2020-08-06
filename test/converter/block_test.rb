@@ -152,7 +152,12 @@ class NotationBlockTest < Minitest::Test
     assert '____', convert('#hr')
   end
 
-  def test_br; end
+  def test_br_plugin
+    origin = ['test', '#br', 'test'].join("\n")
+    expect = ['test', '', 'test'].join("\n")
+
+    assert_equal expect, convert(origin)
+  end
 
   def test_ref; end
 end
