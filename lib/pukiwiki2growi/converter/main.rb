@@ -356,7 +356,7 @@ module Pukiwiki2growi
         end
 
         def del_hash(line)
-          line.gsub(/\[#[0-9a-z]+?\]/, '')
+          line.gsub(/(?: *\[#[0-9a-z]+?\])$/, '')
         end
       end
 

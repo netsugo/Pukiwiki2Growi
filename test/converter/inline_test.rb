@@ -208,6 +208,14 @@ class NotationInlineTest < Minitest::Test
   end
 
   def test_hash
-    assert false
+    testcase = {
+      'test1 [#1234abcd]' => 'test1',
+      'test2 [#1234abc]' => 'test2',
+      'test3 [#1234abcde]' => 'test3',
+      'test4 [#1234abcd] test4' => 'test4 [#1234abcd] test4',
+      '[#1234abcde] test5' => '[#1234abcde] test5'
+    }
+
+    testcase.each { |origin, expect| assert_equal expect, convert(origin) }
   end
 end
