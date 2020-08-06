@@ -128,8 +128,54 @@ class NotationInlineTest < Minitest::Test
     testcase.each { |origin, expect| assert_equal expect, convert(origin) }
   end
 
-  def test_footnote
-    assert false
+  def test_footnote1
+    testcase = {
+      'foo((test1))foo' => "foo[^1]foo\n[^1]:test1",
+      'foo((test2))foo((test2))foo' => "foo[^1]foo[^2]foo\n[^1]:test2\n[^2]:test2",
+      'foo((test3((bar))test3))foo' => "foo[^1]foo\n[^1]:test3[^2]test3\n[^2]:bar",
+      'foo((test41((bar1))test41))foo((test42((bar2))test42))foo' => "foo[^1]foo[^3]foo\n[^1]:test41[^2]test41\n[^2]:bar1\n[^3]:test42[^4]test42\n[^4]:bar2"
+    }
+
+    testcase.each { |origin, expect| assert_equal expect, convert(origin) }
+  end
+
+  def test_footnote2
+    origin = [
+      'foo((test41((bar1))test41))',
+      'foo((test42((bar2))test42))foo'
+    ].join
+    expect = [
+      'foo[^1]foo[^3]foo',
+      '[^1]:test41[^2]test41',
+      '[^2]:bar1',
+      '[^3]:test42[^4]test42',
+      '[^4]:bar2'
+    ].join("\n")
+
+    assert_equal expect, convert(origin)
+  end
+
+  def test_footnote3
+    origin = [
+      'foo((test41((bar1((hoge1))bar1))test41))',
+      'foo((test42((bar2((hoge2))bar2))test42))',
+      'foo((test43((bar3((hoge3))bar3))test43))foo'
+    ].join
+
+    expect = [
+      'foo[^1]foo[^4]foo[^7]foo',
+      '[^1]:test41[^2]test41',
+      '[^2]:bar1[^3]bar1',
+      '[^3]:hoge1',
+      '[^4]:test42[^5]test42',
+      '[^5]:bar2[^6]bar2',
+      '[^6]:hoge2',
+      '[^7]:test43[^8]test43',
+      '[^8]:bar3[^9]bar3',
+      '[^9]:hoge3'
+    ].join("\n")
+
+    assert_equal expect, convert(origin)
   end
 
   def test_ref

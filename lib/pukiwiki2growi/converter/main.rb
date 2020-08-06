@@ -5,11 +5,19 @@ module Pukiwiki2growi
     module Main
       module Block
         class Notation
+          attr_reader :footnotes
+
+          def initialize
+            @footnotes = []
+          end
+
           def convert(line)
             line = Pukiwiki2growi::Converter::Pre::Line.exec(line)
             line = Inline.exec(line)
             line
           end
+
+          def footnote!(offset); end
         end
 
         class Empty < Notation
@@ -21,6 +29,7 @@ module Pukiwiki2growi
         class MultiLine < Notation
           def initialize
             @lines = []
+            @footnotes = []
           end
 
           def to_element(line)
@@ -36,6 +45,17 @@ module Pukiwiki2growi
             obj = new
             obj.push(line)
             obj
+          end
+
+          def footnote!(offset)
+            lst = []
+            @lines.each do |line|
+              ln, ls = Inline.footnote_rec(line, offset + @footnotes.size)
+              lst.push(ln)
+              @footnotes.concat(ls)
+            end
+
+            @lines = lst
           end
 
           def to_s
@@ -54,6 +74,8 @@ module Pukiwiki2growi
           def convert(line)
             line
           end
+
+          def footnote!(offset); end
 
           def to_s
             ['```', super, '```'].join("\n")
@@ -75,6 +97,7 @@ module Pukiwiki2growi
             @level = level
             @element = convert(element)
             @replace = '#'
+            @footnotes = []
           end
 
           def self._create(line, head)
@@ -86,6 +109,10 @@ module Pukiwiki2growi
 
           def self.create(line)
             _create(line, '*')
+          end
+
+          def footnote!(offset)
+            @element, @footnotes = Inline.footnote_rec(@element, offset + @footnotes.size)
           end
 
           def to_s
@@ -156,6 +183,7 @@ module Pukiwiki2growi
         class Page
           def initialize
             @list = []
+            @footnotes = []
           end
 
           def push_paragraph(line, single = false)
@@ -215,8 +243,17 @@ module Pukiwiki2growi
             end
           end
 
+          def footnote!
+            @list.each do |obj|
+              obj.footnote!(@footnotes.size)
+              @footnotes.concat(obj.footnotes)
+            end
+          end
+
           def to_s
-            @list.map(&:to_s).join("\n")
+            @list.map(&:to_s)
+                 .concat(@footnotes.map.with_index { |s, n| "[^#{n + 1}]:#{s}" })
+                 .join("\n")
           end
         end
 
@@ -225,6 +262,7 @@ module Pukiwiki2growi
         def exec(body)
           page = Page.new
           body.split("\n", -1).each { |line| page.push(line) }
+          page.footnote!
           page.to_s
         end
       end
@@ -281,9 +319,22 @@ module Pukiwiki2growi
           line_decoration('%', handlers, line)
         end
 
-        def footnote(line)
-          # TODO: implement
-          line
+        def footnote_rec_single(line, offset, list)
+          footnote = nil
+          index = (offset.negative? ? 0 : offset) + list.size + 1
+
+          line = line.sub(/\(\(((?:\g<0>|[^()])*)\)\)/) do
+            footnote = Regexp.last_match(1)
+            "[^#{index}]"
+          end
+
+          lst = footnote.nil? ? [] : footnote_rec_single(footnote, offset + 1, list).flatten
+          [line, lst]
+        end
+
+        def footnote_rec(line, offset = 0, list = [])
+          ls, lst = footnote_rec_single(line, offset, list)
+          lst.empty? ? [line, list] : footnote_rec(ls, offset, list.concat(lst))
         end
 
         def exec(line)
@@ -291,7 +342,6 @@ module Pukiwiki2growi
           line = Misc.del_hash(line)
           line = em_strong(line)
           line = text_line(line)
-          line = footnote(line)
           line = br(line)
           line
         end
