@@ -42,13 +42,31 @@ module Pukiwiki2growi
 
             name = args[0]
             ext = File.extname(name)
+
+            file_ignore = %w[left center right wrap nowrap]
+            common_ignore = %w[nolink around]
+            ignore = if ext.empty?
+                       common_ignore
+                     else
+                       common_ignore.concat(file_ignore)
+                     end
+            opts = args.slice(1, args.size)
+            loop do
+              break if opts.empty?
+              break unless ignore.include?(opts[0])
+
+              opts.shift
+            end
+
+            alt_name = opts.empty? ? name : opts.join(',')
+
             name.gsub!(%r{(^\./)(.+)}) do
               Regexp.last_match(2)
             end
             if %w[.gif .jpeg .jpg .png .svg .webp].include?(ext.downcase)
-              "![#{name}](#{name})"
+              "![#{alt_name}](#{name})"
             else
-              "[#{name}](#{name})"
+              "[#{alt_name}](#{name})"
             end
           end
 

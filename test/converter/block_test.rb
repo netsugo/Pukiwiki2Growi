@@ -159,5 +159,16 @@ class NotationBlockTest < Minitest::Test
     assert_equal expect, convert(origin)
   end
 
-  def test_ref; end
+  def test_ref
+    testcase = {
+      '#ref(test1.txt)' => '[test1.txt](test1.txt)',
+      '#ref(test2.jpg)' => '![test2.jpg](test2.jpg)',
+      '#ref(test3.txt, left)' => '[test3.txt](test3.txt)',
+      '#ref(test4.txt, test4)' => '[test4](test4.txt)',
+      '#ref(test4.txt, test4, left)' => '[test4,left](test4.txt)',
+      '#ref(http://example.com/test5, test5)' => '[test5](http://example.com/test5)'
+    }
+
+    testcase.each { |origin, expect| assert_equal expect, convert(origin) }
+  end
 end
