@@ -4,45 +4,138 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/c11f448eb2c23bf2d95f/maintainability)](https://codeclimate.com/github/netsugo/pukiwiki2growi/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/c11f448eb2c23bf2d95f/test_coverage)](https://codeclimate.com/github/netsugo/pukiwiki2growi/test_coverage)
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/pukiwiki2growi`. To experiment with that code, run `bin/console` for an interactive prompt.
+PukiWiki から GROWI へ移行するためのツールです。
 
-TODO: Delete this and the text above, and describe your gem
+## Requirements
+
+- 移行先の GROWI が起動しており、添付ファイルをアップロード可能な状態になっていること。
+- Ruby, Bundle があらかじめインストールされていること。
 
 ## Installation
 
-Add this line to your application's Gemfile:
+1. このリポジトリをクローンします。
+1. `bundle install` でライブラリをインストールします。
 
-```ruby
-gem 'pukiwiki2growi'
+```bash
+# HTTPS
+git clone https://github.com/netsugo/pukiwiki2growi.git
+bundle install
 ```
 
-And then execute:
+or
 
-    $ bundle install
+```bash
+# SSH
+git clone git@github.com:netsugo/pukiwiki2growi.git
+bundle install
+```
 
-Or install it yourself as:
+## Configuration
 
-    $ gem install pukiwiki2growi
+[config.yml](config.yml) を開き、以下の項目を設定します。
+
+- （必須）PUKIWIKI_DIR: PukiWiki がインストールされているディレクトリ
+- （必須）URL: GROWI の URL
+- （必須）API_TOKEN: GROWI の API トークン
+- TOP_PAGE: 移行時のトップページを指定します。
+    - `/` を指定すると、GROWI のデフォルトトップページは PukiWiki の `FrontPage` の内容に上書きされます。
+    - `/migrate` と指定した場合、 PukiWikiの `example` のページは `/migrate/example` に移行されます。 `/migrate` の内容は PukiWiki の `FrontPage` の内容となります。 
+- LOG_ROOT: ログの出力先を指定します。デフォルトでは、`log/` 以下に出力されます。
+- ENABLE_PROGRESS: `false` にすると、進捗バーの表示を無効化します。
+- ENABLE_LOG: `false` にすると、ログの出力を無効化します。
 
 ## Usage
 
-TODO: Write usage instructions here
+[migrate.rb](migrate.rb) を実行します。
 
-## Development
+```bash
+bundle install
+ruby ./migrate.rb
+```
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+実行すると、 `log/` 以下に json 形式のログが保存されます。
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+## サポートする要素
+
+- [FormattingRules - PukiWiki](https://pukiwiki.osdn.jp/?FormattingRules)
+
+### ブロック要素
+
+※がついている要素はサポートしていない項目があります。
+
+- 段落
+- 引用文
+- リスト
+    - UL/OL/DL
+- 整形済みテキスト
+- 表組み（※）
+- CSV形式の表組み（※）
+- 見出し
+- 目次
+    - GROWI で toc プラグインを導入している場合に限る
+- 左寄せ・センタリング・右寄せ
+- 水平線
+- 行間明け
+- 添付ファイル・画像の貼り付け（※）
+- shadowheader
+    - 単純な見出しへの変換
+
+以下の要素、およびその他記載されていない要素やプラグインはサポート対象外です。
+
+- 表組み
+    - 左寄せ/中央寄せ/右寄せ
+    - 文字色/背景色
+    - セル幅
+    - ヘッダ/フッダ行
+    - 書式指定行
+    - colspan/rowspan
+- CSV 形式の表組み
+    - 左寄せ/中央寄せ/右寄せ
+    - colspan
+- 添付ファイル
+    - 他ページへの添付ファイルの参照
+    - 位置指定（left/center/right）
+    - 枠指定（wrap/nowrap）
+    - 回り込み（around）
+
+### インライン要素
+
+- 文字列
+- 改行
+- 強調・斜体
+- 文字サイズ
+- 文字色
+- ルビ構造
+- 取消線
+- 注釈
+- 添付ファイル・画像の貼り付け（※）
+- ページ名 (※)
+- InterWiki (※）
+- リンク
+- エイリアス (※）
+- タブコード
+- 文字参照文字
+- 数値参照文字
+- ls/ls2
+    - GROWI で lsx プラグインを導入している場合に限る
+
+以下の要素、およびその他記載されていない要素やプラグインはサポート対象外です。
+
+- WikiName
+- 添付ファイル・画像の貼り付け: [ブロック要素](#ブロック要素)を参照
+- ページ名/InterWiki/エイリアス
+    - アンカーの指定
+- ページ名置換文字
+- 日付置換文字
+
+### その他
+
+- コメント行
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/pukiwiki2growi. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/pukiwiki2growi/blob/master/CODE_OF_CONDUCT.md).
+不具合報告やPRなど随時歓迎しています。
 
+## TODO
 
-## License
-
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
-
-## Code of Conduct
-
-Everyone interacting in the Pukiwiki2growi project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/pukiwiki2growi/blob/master/CODE_OF_CONDUCT.md).
+UTF8 ver のサポート

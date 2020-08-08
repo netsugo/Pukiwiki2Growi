@@ -1,6 +1,17 @@
-require "pukiwiki2growi/version"
+# frozen_string_literal: true
+
+require 'pukiwiki2growi/version'
+require 'pukiwiki2growi/comm'
+require 'pukiwiki2growi/converter'
+require 'pukiwiki2growi/loader'
 
 module Pukiwiki2growi
-  class Error < StandardError; end
-  # Your code goes here...
+  module_function
+
+  def convert(body, top_page = '/')
+    body = Converter::Pre::Body.exec(body)
+    body = Converter::Main.exec(top_page, body)
+    body = Converter::Post::Block.exec(body)
+    body
+  end
 end
