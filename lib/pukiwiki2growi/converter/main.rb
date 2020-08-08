@@ -5,15 +5,17 @@ module Pukiwiki2growi
     module Main
       module Block
         class Notation
+          attr_accessor :top_page
           attr_reader :footnotes
 
           def initialize
             @footnotes = []
+            @top_page = ''
           end
 
           def convert(line)
             line = Pukiwiki2growi::Converter::Pre::Line.exec(line)
-            line = Inline.exec(line)
+            line = Inline.exec(@top_page, line)
             line
           end
 
@@ -251,6 +253,10 @@ module Pukiwiki2growi
             end
           end
 
+          def insert_top_page!(top_page)
+            @list.each { |obj| obj.top_page = top_page }
+          end
+
           def to_s
             @list.map(&:to_s)
                  .concat(@footnotes.map.with_index { |s, n| "[^#{n + 1}]:#{s}" })
@@ -260,9 +266,10 @@ module Pukiwiki2growi
 
         module_function
 
-        def exec(body)
+        def exec(top_page, body)
           page = Page.new
           body.split("\n", -1).each { |line| page.push(line) }
+          page.insert_top_page!(top_page)
           page.footnote!
           page.to_s
         end
@@ -320,6 +327,38 @@ module Pukiwiki2growi
           line_decoration('%', handlers, line)
         end
 
+        def fix_link(top_page, link)
+          # InterWiki
+          if link.match(/^([A-Z][a-z]+)+?:(.+)/)
+            link
+          # absolute/relative path | URI
+          elsif link.match(%r{(?:^\.{0,2}/)|(?:^[a-z]+?://([\w\-]+\.)+\w+(/[\w\-./?%&=]*)?$)})
+            link
+          elsif link.match(/^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/)
+            "mailto:#{link}"
+          else
+            File.join(top_page, link)
+          end
+        end
+
+        def md_link(name, link)
+          ext = File.extname(link)
+          if %w[.gif .jpeg .jpg .png .svg .webp].include?(ext.downcase)
+            "![#{name}](#{link})"
+          else
+            "[#{name}](#{link})"
+          end
+        end
+
+        def page_link_alias(top_page, line)
+          line.gsub(/\[\[(.+?)(?:([>:])(.+?))?\]\]/) do
+            name = Regexp.last_match(1)
+            link = Regexp.last_match(3) || name
+            link = fix_link(top_page, link)
+            md_link(name, link)
+          end
+        end
+
         def footnote_rec_single(line, offset, list)
           footnote = nil
           index = (offset.negative? ? 0 : offset) + list.size + 1
@@ -338,11 +377,12 @@ module Pukiwiki2growi
           lst.empty? ? [line, list] : footnote_rec(ls, offset, list.concat(lst))
         end
 
-        def exec(line)
+        def exec(top_page, line)
           line = Misc.comment(line)
           line = Misc.del_hash(line)
           line = em_strong(line)
           line = text_line(line)
+          line = page_link_alias(top_page, line)
           line = br(line)
           line
         end
@@ -362,8 +402,8 @@ module Pukiwiki2growi
 
       module_function
 
-      def exec(body)
-        Block.exec(body)
+      def exec(top_page, body)
+        Block.exec(top_page, body)
       end
     end
   end

@@ -8,9 +8,9 @@ require 'pukiwiki2growi/loader'
 module Pukiwiki2growi
   module_function
 
-  def convert(body, top_page)
+  def convert(body, top_page = '/')
     body = Converter::Pre::Body.exec(body)
-    body = Converter::Main.exec(body)
+    body = Converter::Main.exec(top_page, body)
     body = Converter::Post::Block.exec(body)
     body
   end

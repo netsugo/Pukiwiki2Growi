@@ -3,8 +3,8 @@
 require_relative '../test_helper'
 
 class NotationInlineTest < Minitest::Test
-  def convert(body)
-    Pukiwiki2growi.convert(body, nil)
+  def convert(body, top_page = '/')
+    Pukiwiki2growi.convert(body, top_page)
   end
 
   # br
@@ -186,7 +186,7 @@ class NotationInlineTest < Minitest::Test
       '&ref(test4.txt, test4);' => '[test4](test4.txt)',
       '&ref(test5.txt, test5, nolink);' => '[test5,nolink](test5.txt)',
       '&ref(http://example.com/test6, test6);' => '[test6](http://example.com/test6)'
-     }
+    }
 
     testcase.each { |origin, expect| assert_equal expect, convert(origin) }
   end
@@ -199,8 +199,33 @@ class NotationInlineTest < Minitest::Test
     testcase.each { |origin, expect| assert_equal expect, convert(origin) }
   end
 
-  def test_link
-    assert false
+  def test_link_page
+    top_page = '/top_page'
+    testcase = {
+      '[[test1]]' => '[test1](/top_page/test1)',
+      '[[/test2]]' => '[/test2](/test2)',
+      '[[./test3]]' => '[./test3](./test3)',
+      '[[../test4]]' => '[../test4](../test4)',
+      '[[test5.jpg]]' => '![test5.jpg](/top_page/test5.jpg)'
+    }
+
+    testcase.each { |origin, expect| assert_equal expect, convert(origin, top_page) }
+  end
+
+  def test_link_alias
+    top_page = '/top_page'
+    testcase = {
+      '[[alias1>scheme://example.com/path]]' => '[alias1](scheme://example.com/path)',
+      '[[alias2:scheme://example.com/path]]' => '[alias2](scheme://example.com/path)',
+      '[[alias3>user@example.com]]' => '[alias3](mailto:user@example.com)',
+      '[[alias4:user@example.com]]' => '[alias4](mailto:user@example.com)',
+      '[[alias5>InterWiki:page]]' => '[alias5](InterWiki:page)',
+      '[[alias6:InterWiki:page]]' => '[alias6](InterWiki:page)',
+      '[[alias7>test7]]' => '[alias7](/top_page/test7)',
+      '[[alias8>test8]]' => '[alias8](/top_page/test8)'
+    }
+
+    testcase.each { |origin, expect| assert_equal expect, convert(origin, top_page) }
   end
 
   def test_comment
