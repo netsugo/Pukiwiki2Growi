@@ -15,7 +15,7 @@ module Pukiwiki2growi
 
           def convert(line)
             line = Pukiwiki2growi::Converter::Pre::Line.exec(line)
-            line = Inline.exec(@top_page, line)
+            line = Inline.exec(top_page, line)
             line
           end
 
