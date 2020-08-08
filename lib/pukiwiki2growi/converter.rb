@@ -9,11 +9,19 @@ module Pukiwiki2growi
   module Converter
     module_function
 
-    def convert_page(body, _wiki_root)
-      body = Pre::Body.exec(body)
-      body = Main.exec(body)
-      body = Post::Block.exec(body)
-      body
+    def convert_attach(page, origin2attach)
+      # raise NotImplementedError
+
+      page.gsub(/(\[)(.*)(\])(\()(.*)(\))/) do
+        tag, origin = [Regexp.last_match(2), Regexp.last_match(5)].map do |name|
+          name.gsub(%r{(^\./)(.+)}) do
+            Regexp.last_match(2)
+          end
+        end
+
+        new_name = origin2attach[origin] || origin
+        "[#{tag}](#{new_name})"
+      end
     end
   end
 end

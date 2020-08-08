@@ -1,0 +1,7 @@
+PUKIWIKI_DIR: wiki
+URL: http://localhost:3000
+API_TOKEN: API+token=
+TOP_PAGE: '/migrate'
+LOG_ROOT: 'log'
+ENABLE_PROGRESS: true
+ENABLE_LOG: true
