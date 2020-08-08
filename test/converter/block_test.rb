@@ -4,7 +4,7 @@ require_relative '../test_helper'
 
 class NotationBlockTest < Minitest::Test
   def convert(body)
-    Pukiwiki2growi::Converter.convert_page(body, nil)
+    Pukiwiki2growi.convert(body, nil)
   end
 
   def test_paragraph1
