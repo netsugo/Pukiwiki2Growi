@@ -3,6 +3,159 @@
 module Pukiwiki2growi
   module Converter
     module Plugin
+      module Block
+        module_function
+
+        def ls2(args)
+          return '$lsx()' if args.nil?
+
+          case args.size
+          when 0
+            ls2(nil)
+          when 1
+            "$lsx(#{args[0]})"
+          else
+            case args[1]
+            when 'reverse'
+              "$lsx(#{args[0]}, reverse=true)"
+            else
+              ls2([args[0]])
+            end
+          end
+        end
+
+        def ref(args)
+          return nil if args.nil? || args.empty?
+
+          name = args[0]
+          ext = File.extname(name)
+
+          file_ignore = %w[left center right wrap nowrap]
+          common_ignore = %w[nolink around]
+          ignore = if ext.empty?
+                     common_ignore
+                   else
+                     common_ignore.concat(file_ignore)
+                   end
+          opts = args.slice(1, args.size)
+          loop do
+            break if opts.empty?
+            break unless ignore.include?(opts[0])
+
+            opts.shift
+          end
+
+          alt_name = opts.empty? ? name : opts.join(',')
+
+          name.gsub!(%r{(^\./)(.+)}) do
+            Regexp.last_match(2)
+          end
+          if %w[.gif .jpeg .jpg .png .svg .webp].include?(ext.downcase)
+            "![#{alt_name}](#{name})"
+          else
+            "[#{alt_name}](#{name})"
+          end
+        end
+
+        # custom: { 'plugin1' => lambda |args| { ... }, 'plugin2' => lambda |args| { ... }, ... }
+        def exec(line, custom = {})
+          static = {
+            'contents' => '@[toc]',
+            'hr' => '_' * 4,
+            'br' => "\n"
+          }.map { |k, v| [k, ->(_) { v }] }.to_h
+          dynamic = {
+            'ls' => ->(_) { ls2(nil) },
+            'ls2' => ->(args) { ls2(args) },
+            'ref' => ->(args) { ref(args) }
+          }
+          Converter::Plugin.block(static.merge(dynamic).merge(custom), line)
+        end
+      end
+
+      module Inline
+        module_function
+
+        # inline
+        def htag(name, args, inline)
+          attribute = args.map { |k, v| " #{k}=\"#{v}\"" }.join
+          "<#{name}#{attribute}>#{inline}</#{name}>"
+        end
+
+        def span_style(style_args, inline)
+          style = style_args.map { |k, v| "#{k}:#{v}" }.join(';')
+          htag('span', { 'style' => style }, inline)
+        end
+
+        def size(args, inline)
+          return nil if args.nil? || inline.nil?
+
+          case args.size
+          when 0
+            inline
+          else
+            span_style({ 'font-size' => "#{args[0]}px" }, inline)
+          end
+        end
+
+        def color_style(color, bgcolor, inline)
+          style_args = { 'color' => color }
+          style_args['bgcolor'] = bgcolor unless bgcolor.nil?
+          span_style(style_args, inline)
+        end
+
+        def color(args, inline)
+          return nil if args.nil? || (args.size < 2 && inline.nil?)
+
+          case args.size
+          when 0
+            inline
+          when 1
+            color_style(args[0], nil, inline)
+          else
+            if inline.nil?
+              color([args[0]], args[1])
+            else
+              color_style(args[0], args[1], inline)
+            end
+          end
+        end
+
+        def ruby(args, inline)
+          return nil if args.nil? || inline.nil?
+
+          case args.size
+          when 0
+            inline
+          else
+            content = [inline, htag('rp', {}, '('), htag('rt', {}, args[0]), htag('rp', {}, ')')].join
+            htag('ruby', {}, content)
+          end
+        end
+
+        # custom: { 'plugin1' => lambda |args, inline| { ... }, 'plugin2' => lambda |args, inline| { ... }, ... }
+        def exec(line, custom = {})
+          static = {
+            'heart' => ':heart:',
+            'smile' => ':smiley:',
+            'bigsmile' => ':laughing:',
+            'huh' => ':stuck_out_tongue:',
+            'oh' => ':angry:',
+            'wink' => ':wink:',
+            'sad' => ':worried:',
+            'worried' => ':cold_sweat:',
+            't' => "\t"
+          }.map { |k, v| [k, ->(_, _) { v }] }.to_h
+          dynamic = {
+            'color' => ->(args, inline) { color(args, inline) },
+            'size' => ->(args, inline) { size(args, inline) },
+            'ruby' => ->(args, inline) { ruby(args, inline) },
+            'ref' => ->(args, _) { Converter::Plugin::Block.ref(args) }
+          }
+          Converter::Plugin.inline(static.merge(dynamic).merge(custom), line)
+        end
+      end
+
       module_function
 
       def unknown_block(name, args)
@@ -48,6 +201,17 @@ module Pukiwiki2growi
         line.gsub(regex) do
           inline_rec_short(mapping, Regexp.last_match(0))
         end
+      end
+
+      def exec(line)
+        block_custom = {
+          'shadowheader' => lambda { |args|
+            args.nil? || args.size < 2 ? nil : "#{'#' * args[0].to_i} #{args[1]}"
+          }
+        }
+        line = Block.exec(line, block_custom)
+        line = Inline.exec(line)
+        line
       end
     end
   end
