@@ -1,7 +1,8 @@
 # Pukiwiki2growi
 
 [![Build Status](https://travis-ci.com/netsugo/pukiwiki2growi.svg?branch=master)](https://travis-ci.com/netsugo/pukiwiki2growi)
-[![codecov](https://codecov.io/gh/netsugo/pukiwiki2growi/branch/master/graph/badge.svg)](https://codecov.io/gh/netsugo/pukiwiki2growi)
+[![Maintainability](https://api.codeclimate.com/v1/badges/c11f448eb2c23bf2d95f/maintainability)](https://codeclimate.com/github/netsugo/pukiwiki2growi/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/c11f448eb2c23bf2d95f/test_coverage)](https://codeclimate.com/github/netsugo/pukiwiki2growi/test_coverage)
 
 Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/pukiwiki2growi`. To experiment with that code, run `bin/console` for an interactive prompt.
 
