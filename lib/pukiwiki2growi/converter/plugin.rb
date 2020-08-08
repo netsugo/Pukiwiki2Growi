@@ -24,6 +24,15 @@ module Pukiwiki2growi
           end
         end
 
+        def md_link(name, link)
+          ext = File.extname(link)
+          if %w[.gif .jpeg .jpg .png .svg .webp].include?(ext.downcase)
+            "![#{name}](#{link})"
+          else
+            "[#{name}](#{link})"
+          end
+        end
+
         def ref(args)
           return nil if args.nil? || args.empty?
 
@@ -32,11 +41,7 @@ module Pukiwiki2growi
 
           file_ignore = %w[left center right wrap nowrap]
           common_ignore = %w[nolink around]
-          ignore = if ext.empty?
-                     common_ignore
-                   else
-                     common_ignore.concat(file_ignore)
-                   end
+          ignore = common_ignore.concat(ext.empty? ? [] : file_ignore)
           opts = args.slice(1, args.size)
           loop do
             break if opts.empty?
@@ -50,11 +55,8 @@ module Pukiwiki2growi
           name.gsub!(%r{(^\./)(.+)}) do
             Regexp.last_match(2)
           end
-          if %w[.gif .jpeg .jpg .png .svg .webp].include?(ext.downcase)
-            "![#{alt_name}](#{name})"
-          else
-            "[#{alt_name}](#{name})"
-          end
+
+          md_link(alt_name, name)
         end
 
         # custom: { 'plugin1' => lambda |args| { ... }, 'plugin2' => lambda |args| { ... }, ... }

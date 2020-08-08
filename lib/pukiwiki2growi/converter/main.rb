@@ -341,21 +341,12 @@ module Pukiwiki2growi
           end
         end
 
-        def md_link(name, link)
-          ext = File.extname(link)
-          if %w[.gif .jpeg .jpg .png .svg .webp].include?(ext.downcase)
-            "![#{name}](#{link})"
-          else
-            "[#{name}](#{link})"
-          end
-        end
-
         def page_link_alias(top_page, line)
           line.gsub(/\[\[(.+?)(?:([>:])(.+?))?\]\]/) do
             name = Regexp.last_match(1)
             link = Regexp.last_match(3) || name
             link = fix_link(top_page, link)
-            md_link(name, link)
+            Plugin::Block.md_link(name, link)
           end
         end
 
