@@ -65,7 +65,6 @@ class Migrator
     @client = client
     @logger = logger
     @show_progress = show_progress
-    @top_page = @loader.top_page
   end
 
   def ret_okerr(rets)
