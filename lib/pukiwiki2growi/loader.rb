@@ -4,6 +4,8 @@ require 'nkf'
 
 module Pukiwiki2growi
   class Loader
+    attr_reader :top_page
+
     def initialize(pukiwiki_root, encoding, top_page = '/')
       root = File.expand_path(pukiwiki_root)
       @page_root = File.join(root, 'wiki')

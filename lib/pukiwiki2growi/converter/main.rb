@@ -5,52 +5,32 @@ module Pukiwiki2growi
     module Main
       module Block
         class Notation
-          attr_accessor :top_page
           attr_reader :footnotes
 
-          def initialize
-            @footnotes = []
-            @top_page = ''
-          end
-
-          def convert(line)
-            line = Pukiwiki2growi::Converter::Pre::Line.exec(line)
-            line = Inline.exec(top_page, line)
-            line
-          end
-
-          def footnote!(offset); end
-        end
-
-        class Empty < Notation
-          def to_s
-            ''
+          def footnote!(_offset)
+            raise NotImplementedError
           end
         end
 
         class MultiLine < Notation
           def initialize
-            @lines = []
             @footnotes = []
+            @lines = []
           end
 
-          def to_element(line)
-            line
-          end
-
-          def push(line)
-            element = to_element(line)
+          def push(element)
             @lines.push(element)
           end
 
-          def self.create(line)
-            obj = new
-            obj.push(line)
-            obj
+          def enable_footnote
+            raise NotImplementedError
           end
 
           def footnote!(offset)
+            return unless enable_footnote
+
             lst = []
+            @footnotes = []
             @lines.each do |line|
               ln, ls = Inline.footnote_rec(line, offset + @footnotes.size)
               lst.push(ln)
@@ -59,205 +39,346 @@ module Pukiwiki2growi
 
             @lines = lst
           end
-
-          def to_s
-            @lines.map { |s| convert(s) }.join("\n")
-          end
         end
 
-        class Paragraph < MultiLine
-        end
-
-        class PreFormatted < MultiLine
-          def to_element(line)
-            line[1, line.size]
+        class HeadingLine < Notation
+          def level
+            raise NotImplementedError
           end
 
-          def convert(line)
-            line
+          def pat
+            raise NotImplementedError
           end
 
-          def footnote!(offset); end
-
-          def to_s
-            ['```', super, '```'].join("\n")
-          end
-        end
-
-        class Table < MultiLine
-          def to_s
-            count = 0
-            count = @lines[0].count('|') unless @lines.empty?
-            header = Array.new(count, '|').join('     ')
-            middle = Array.new(count, '|').join(' --- ')
-            [header, middle, super].join("\n")
-          end
-        end
-
-        class Heading < Notation
-          def initialize(level, element)
-            @level = level
-            @element = convert(element)
-            @replace = '#'
-            @footnotes = []
-          end
-
-          def self._create(line, head)
-            [3, 2, 1].each do |n|
-              return new(n, line[n, line.size].lstrip) if line.start_with?(head * n)
-            end
-            nil
-          end
-
-          def self.create(line)
-            _create(line, '*')
+          def element
+            raise NotImplementedError
           end
 
           def footnote!(offset)
             @element, @footnotes = Inline.footnote_rec(@element, offset + @footnotes.size)
           end
+        end
+
+        class StaticLine < Notation
+          def text
+            raise NotImplementedError
+          end
+
+          def footnotes
+            []
+          end
+
+          def footnote!(offset); end
 
           def to_s
-            [@replace * @level, ' ', @element].join
+            text
+          end
+        end
+
+        class Empty < StaticLine
+          def text
+            ''
+          end
+        end
+
+        class Paragraph < MultiLine
+          def enable_footnote
+            true
+          end
+
+          def to_s
+            @lines.join("\n")
+          end
+        end
+
+        class PreFormatted < MultiLine
+          def enable_footnote
+            false
+          end
+
+          def to_s
+            ['```'].concat(@lines).concat(['```']).join("\n")
+          end
+        end
+
+        class Table < MultiLine
+          def enable_footnote
+            true
+          end
+
+          def to_s
+            count = 0
+            count = @lines[0].count('|') unless @lines.empty?
+            header = Array.new(count, '|').join('     ')
+            middle = Array.new(count, '|').join(' --- ')
+            [header, middle].concat(@lines).join("\n")
+          end
+        end
+
+        class Heading < HeadingLine
+          attr_reader :level, :element
+
+          def initialize(level, element)
+            @level = level
+            @element = element
+            @footnotes = []
+          end
+
+          def pat
+            '#'
+          end
+
+          def to_s
+            [pat * level, ' ', element].join
           end
         end
 
         # it doesn't look itself's forward/back quotation
-        class Quote < Heading
+        class Quote < HeadingLine
+          attr_reader :level, :element
+
           def initialize(level, element)
-            super(level, element)
-            @replace = '>'
+            @level = level
+            @element = element
+            @footnotes = []
           end
 
-          def self.create(line)
-            _create(line, '>')
+          def pat
+            '>'
+          end
+
+          def to_s
+            [pat * level, ' ', element].join
           end
         end
 
         class BQuote < Quote
-          def self.create(line)
-            _create(line, '<')
+          attr_reader :level, :element
+
+          def initialize(level, element)
+            @level = level - 1
+            @element = element
+            @footnotes = []
           end
 
           def to_s
-            level = @level - 1
             if level < 1
-              @element
+              element
             else
-              [@replace * level, ' ', @element].join
+              [pat * level, ' ', element].join
             end
           end
         end
 
-        class UList < Heading
+        class UList < HeadingLine
+          attr_reader :level, :element
+
           def initialize(level, element)
-            super(level, element)
-            @replace = '*'
-            @padding = '  '
+            @level = level - 1
+            @element = element
+            @footnotes = []
           end
 
-          def self.create(line)
-            _create(line, '-')
+          def pat
+            '*'
           end
 
           def to_s
-            [@padding * (@level - 1), @replace, ' ', @element].join
+            ['  ' * level, pat, ' ', element].join
           end
         end
 
         class OList < UList
+          attr_reader :level, :element
+
           def initialize(level, element)
-            super(level, element)
-            @replace = '1.'
+            @level = level - 1
+            @element = element
+            @footnotes = []
           end
 
-          def self.create(line)
-            _create(line, '+')
+          def pat
+            '1.'
           end
         end
 
-        class Horizontal < Notation
-          def to_s
+        class Horizontal < StaticLine
+          def text
             '_' * 4
           end
         end
 
-        class Page
-          def initialize
-            @list = []
-            @footnotes = []
-          end
+        module Utils
+          module_function
 
-          def push_paragraph(line, single = false)
-            if single
-              @list.push(Empty.new) if @list.last.is_a?(Paragraph)
-              @list.push(Paragraph.create(line[1, line.size].lstrip))
-              @list.push(Empty.new)
-            elsif @list.last.is_a?(Paragraph)
-              @list.last.push(line)
-            else
-              @list.push(Paragraph.create(line))
+          def convert(top_page, line)
+            line = Pukiwiki2growi::Converter::Pre::Line.exec(line)
+            line = Inline.exec(top_page, line)
+            line
+          end
+        end
+
+        module SingleFactory
+          module_function
+
+          def to_element(top_page, line, head)
+            [3, 2, 1].each do |n|
+              next unless line.start_with?(head * n)
+
+              element = line[n, line.size].lstrip
+              return [n, Utils.convert(top_page, element)]
             end
+            nil
           end
 
-          def push_preformatted(line)
-            if @list.last&.is_a?(PreFormatted)
-              @list.last.push(line)
-            else
-              @list.push(PreFormatted.create(line))
-            end
+          def heading(top_page, line)
+            n, element = to_element(top_page, line, '*')
+            Heading.new(n, element)
           end
 
-          def push_table(line)
-            if @list.last&.is_a?(Table)
-              @list.last.push(line)
-            else
-              @list.push(Table.create(line))
-            end
+          def quote(top_page, line)
+            n, element = to_element(top_page, line, '>')
+            Quote.new(n, element)
           end
 
-          def push_bquote(line)
+          def bquote(top_page, line)
             ignore_regex = %r{^<(div style=".*?:.*?"|/div)>}
             if line.match(ignore_regex)
-              push_paragraph(line)
+              nil
             else
-              @list.push(BQuote.create(line))
+              n, element = to_element(top_page, line, '<')
+              BQuote.new(n, element)
             end
+          end
+
+          def ulist(top_page, line)
+            if line.start_with?('----')
+              Horizontal.new
+            else
+              n, element = to_element(top_page, line, '-')
+              UList.new(n, element)
+            end
+          end
+
+          def olist(top_page, line)
+            n, element = to_element(top_page, line, '+')
+            OList.new(n, element)
           end
 
           def mapping
             {
-              '~' => ->(line) { push_paragraph(line, line != '~') },
-              '>' => ->(line) { @list.push(Quote.create(line)) },
-              '<' => ->(line) { push_bquote(line) },
-              '-' => ->(line) { @list.push(line.start_with?('----') ? Horizontal.new : UList.create(line)) },
-              '+' => ->(line) { @list.push(OList.create(line)) },
-              ' ' => ->(line) { push_preformatted(line) },
-              '|' => ->(line) { push_table(line) },
-              '*' => ->(line) { @list.push(Heading.create(line)) }
+              '*' => ->(tp, l) { heading(tp, l) },
+              '>' => ->(tp, l) { quote(tp, l) },
+              '<' => ->(tp, l) { bquote(tp, l) },
+              '-' => ->(tp, l) { ulist(tp, l) },
+              '+' => ->(tp, l) { olist(tp, l) }
             }
           end
 
-          def push(line)
+          def create(top_page, line)
             if line.empty?
-              @list.push(Empty.new)
+              Empty.new
             else
-              mapping[line[0]]&.call(line) || push_paragraph(line)
+              mapping[line[0]]&.call(top_page, line)
+            end
+          end
+        end
+
+        module MultiFactory
+          module_function
+
+          def paragraph(conv)
+            obj = Paragraph.new
+            obj.push(conv)
+            obj
+          end
+
+          def preformatted(conv)
+            obj = PreFormatted.new
+            obj.push(conv)
+            obj
+          end
+
+          def table(conv)
+            obj = Table.new
+            obj.push(conv)
+            obj
+          end
+        end
+
+        class Builder
+          def initialize
+            @list = []
+            @footnotes = nil # cache
+          end
+
+          def push_paragraph(top_page, element)
+            conv = Utils.convert(top_page, element)
+            if @list.last.is_a?(Paragraph)
+              @list.last.push(conv)
+            else
+              @list.push(MultiFactory.paragraph(conv))
             end
           end
 
-          def footnote!
-            @list.each do |obj|
-              obj.footnote!(@footnotes.size)
-              @footnotes.concat(obj.footnotes)
+          def push_paragraph_single(top_page, line)
+            if line == '~'
+              push_paragraph(top_page, line)
+              return
+            end
+            element = line[1, line.size].lstrip
+            @list.push(Empty.new) if @list.last.is_a?(Paragraph)
+            push_paragraph(top_page, element)
+            @list.push(Empty.new)
+          end
+
+          def push_preformatted(line)
+            element = line[1, line.size]
+            conv = element
+            if @list.last.is_a?(PreFormatted)
+              @list.last.push(conv)
+            else
+              @list.push(MultiFactory.preformatted(conv))
             end
           end
 
-          def insert_top_page!(top_page)
-            @list.each { |obj| obj.top_page = top_page }
+          def push_table(top_page, line)
+            element = line
+            conv = Utils.convert(top_page, element)
+            if @list.last.is_a?(Table)
+              @list.last.push(conv)
+            else
+              @list.push(MultiFactory.table(conv))
+            end
+          end
+
+          def multi_mapping
+            {
+              '~' => ->(tp, l) { push_paragraph_single(tp, l) },
+              ' ' => ->(_, l) { push_preformatted(l) },
+              '|' => ->(tp, l) { push_table(tp, l) }
+            }
+          end
+
+          def push(top_page, line)
+            single = SingleFactory.create(top_page, line)
+            if single.nil?
+              handler = multi_mapping[line[0]] || ->(tp, l) { push_paragraph(tp, l) }
+              handler.call(top_page, line)
+            else
+              @list.push(single)
+            end
           end
 
           def to_s
+            if @footnotes.nil?
+              footnotes = []
+              @list.each do |obj|
+                obj.footnote!(footnotes.size)
+                footnotes.concat(obj.footnotes)
+              end
+              @footnotes = footnotes
+            end
             @list.map(&:to_s)
                  .concat(@footnotes.map.with_index { |s, n| "[^#{n + 1}]:#{s}" })
                  .join("\n")
@@ -267,11 +388,9 @@ module Pukiwiki2growi
         module_function
 
         def exec(top_page, body)
-          page = Page.new
-          body.split("\n", -1).each { |line| page.push(line) }
-          page.insert_top_page!(top_page)
-          page.footnote!
-          page.to_s
+          builder = Builder.new
+          body.split("\n", -1).each { |line| builder.push(top_page, line) }
+          builder.to_s
         end
       end
 
