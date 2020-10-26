@@ -49,7 +49,7 @@ DEPENDENCIES
   minitest (~> 5.0)
   pukiwiki2growi!
   rake (~> 12.0)
-  simplecov
+  simplecov (~> 0.10)
 
 BUNDLED WITH
    2.1.4
