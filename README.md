@@ -136,6 +136,11 @@ ruby ./migrate.rb
 
 不具合報告やPRなど随時歓迎しています。
 
+## Inspired by
+
+- [ryu-sato/conv-pkwk2growi](https://github.com/ryu-sato/conv-pkwk2growi)
+- [sunaot/pukiwiki2md](https://github.com/sunaot/pukiwiki2md)
+
 ## TODO
 
 UTF8 ver のサポート
