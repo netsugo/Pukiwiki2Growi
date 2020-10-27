@@ -171,4 +171,40 @@ class NotationBlockTest < Minitest::Test
 
     testcase.each { |origin, expect| assert_equal expect, convert(origin) }
   end
+
+  def test_ls
+    testcase = {
+      '#ls' => '$lsx()',
+      '#ls()' => '$lsx()',
+      '#ls(title)' => '$lsx()'
+    }
+
+    testcase.each { |origin, expect| assert_equal expect, convert(origin) }
+  end
+
+  def test_ls2
+    testcase = {
+      '#ls2' => '$lsx()',
+      '#ls2()' => '$lsx()',
+      '#ls2(test/page)' => '$lsx(test/page)',
+      '#ls2(,)' => '$lsx()'
+    }
+
+    testcase.each { |origin, expect| assert_equal expect, convert(origin) }
+  end
+
+  def test_ls2_opts
+    testcase = {
+      '#ls2(test/page,title)' => '$lsx(test/page)',
+      '#ls2(test/page,include)' => '$lsx(test/page)',
+      '#ls2(test/page,reverse)' => '$lsx(test/page, reverse=true)',
+      '#ls2(test/page,compact)' => '$lsx(test/page)',
+      '#ls2(test/page,link)' => '$lsx(test/page)',
+      '#ls2(test/page,link,linkname)' => '$lsx(test/page)',
+      '#ls2(,reverse)' => '$lsx(reverse=true)',
+      '#ls2(,title,include,reverse,compact,link,linkname)' => '$lsx(reverse=true)'
+    }
+
+    testcase.each { |origin, expect| assert_equal expect, convert(origin) }
+  end
 end

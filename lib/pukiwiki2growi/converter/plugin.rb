@@ -15,12 +15,12 @@ module Pukiwiki2growi
           when 1
             "$lsx(#{args[0]})"
           else
-            case args[1]
-            when 'reverse'
-              "$lsx(#{args[0]}, reverse=true)"
-            else
-              ls2([args[0]])
-            end
+            head = args[0] # not nil
+            tail = args[1..-1] # index 1 to last
+            new_args = []
+            new_args << head if !head.nil? && !head.empty?
+            new_args << 'reverse=true' if tail.include?('reverse')
+            "$lsx(#{new_args.join(', ')})"
           end
         end
 
@@ -177,7 +177,7 @@ module Pukiwiki2growi
       end
 
       def block(mapping, line)
-        line.gsub(/^#([0-9a-zA-Z_]+)(\(([^\n]+)\).*)?/) do
+        line.gsub(/^#([0-9a-zA-Z_]+)(\(([^\n]*)\).*)?/) do
           name = Regexp.last_match(1)&.downcase
           args = Regexp.last_match(3)&.split(',')&.map(&:strip)
           mapping[name]&.call(args) || unknown_block(name, args)
