@@ -447,13 +447,15 @@ module Pukiwiki2growi
         end
 
         def fix_link(top_page, link)
+          case link
           # InterWiki
-          if link.match(/^([A-Z][a-z]+)+?:(.+)/)
+          when /^([A-Z][a-z]+)+?:(.+)/
             link
           # absolute/relative path | URI
-          elsif link.match(%r{(?:^\.{0,2}/)|(?:^[a-z]+?://([\w\-]+\.)+\w+(/[\w\-./?%&=]*)?$)})
+          when %r{(?:^\.{0,2}/)|(?:^[a-z]+?://([\w\-]+\.)+\w+(/[\w\-./?%&=]*)?$)}
             link
-          elsif link.match(/^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/)
+          # mail link
+          when /^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/
             "mailto:#{link}"
           else
             File.join(top_page, link)
