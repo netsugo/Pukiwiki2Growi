@@ -5,3 +5,4 @@ TOP_PAGE: '/migrate'
 LOG_ROOT: 'log'
 ENABLE_PROGRESS: true
 ENABLE_LOG: true
+ENCODING: 'UTF-8' # or EUC-JP

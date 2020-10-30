@@ -284,7 +284,7 @@ class Migrator
     pre_pages = pre_pages(pukiwiki_pages, map_path_retpage, attach_success)
 
     Parallel.map(pre_pages, progress: 'Convert') do |page|
-      conv = Pukiwiki2growi.convert(page.body, @top_page)
+      conv = Pukiwiki2growi.convert(page.body, @loader.top_page)
       ret = Pukiwiki2growi::Converter.convert_attach(conv, page.origin2attach)
       page.create(ret)
     end
@@ -303,7 +303,7 @@ class Migrator
   end
 
   def self.create(config)
-    loader = Pukiwiki2growi::Loader.new(config['PUKIWIKI_DIR'], 'EUC-JP', config['TOP_PAGE'])
+    loader = Pukiwiki2growi::Loader.new(config['PUKIWIKI_DIR'], config['ENCODING'], config['TOP_PAGE'])
     logger = Logger.new(config['LOG_ROOT'], config['ENABLE_LOG'])
     client = Pukiwiki2growi::Comm::Client.new(config['URL'], config['API_TOKEN'])
     progress = config['ENABLE_PROGRESS']
