@@ -6,29 +6,16 @@
 
 PukiWiki から GROWI へ移行するためのツールです。
 
+## Features
+
+- Regexと並列化による高速変換
+- ほとんどのPukiWiki要素をサポート
+- 添付ファイルを完全サポート
+
 ## Requirements
 
 - 移行先の GROWI が起動しており、添付ファイルをアップロード可能な状態になっていること。
 - Ruby, Bundle があらかじめインストールされていること。
-
-## Installation
-
-1. このリポジトリをクローンします。
-1. `bundle install` でライブラリをインストールします。
-
-```bash
-# HTTPS
-git clone https://github.com/netsugo/pukiwiki2growi.git
-bundle install
-```
-
-or
-
-```bash
-# SSH
-git clone git@github.com:netsugo/pukiwiki2growi.git
-bundle install
-```
 
 ## Configuration
 
@@ -38,7 +25,7 @@ bundle install
 - （必須）URL: GROWI の URL
 - （必須）API_TOKEN: GROWI の API トークン
 - TOP_PAGE: 移行時のトップページを指定します。
-    - `/` を指定すると、GROWI のデフォルトトップページは PukiWiki の `FrontPage` の内容に上書きされます。
+    - `/` を指定すると、GROWI のトップページは PukiWiki の `FrontPage` の内容に上書きされます。
     - `/migrate` と指定した場合、 PukiWikiの `example` のページは `/migrate/example` に移行されます。 `/migrate` の内容は PukiWiki の `FrontPage` の内容となります。 
 - LOG_ROOT: ログの出力先を指定します。デフォルトでは、`log/` 以下に出力されます。
 - ENABLE_PROGRESS: `false` にすると、進捗バーの表示を無効化します。
@@ -138,9 +125,5 @@ rake app
 
 - [ryu-sato/conv-pkwk2growi](https://github.com/ryu-sato/conv-pkwk2growi)
 - [sunaot/pukiwiki2md](https://github.com/sunaot/pukiwiki2md)
-
-## TODO
-
-- リンク先が空白を含む時はエスケープしたい
-- スペースx4時の挙動確認
-- 作成・更新日時の反映
+- [PukiWiki](https://pukiwiki.osdn.jp/)
+- [GROWI](https://growi.org/)
