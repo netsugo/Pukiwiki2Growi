@@ -10,7 +10,7 @@ PukiWiki から GROWI へ移行するためのツールです。
 
 - Regexと並列化による高速変換
 - ほとんどのPukiWiki要素をサポート
-- 添付ファイルを完全サポート
+- 添付ファイルをサポート
 
 ## Requirements
 
