@@ -3,6 +3,33 @@
 require 'nkf'
 
 module Pukiwiki2growi
+  class Page
+    attr_reader :page_path, :body
+
+    def initialize(page_path, body)
+      @page_path = page_path
+      @body = body
+    end
+
+    def ==(other)
+      @page_path == other.page_path && @body == other.body
+    end
+  end
+
+  class Attachment
+    attr_reader :file_path, :page_path, :name
+
+    def initialize(file_path, page_path, name)
+      @file_path = file_path
+      @page_path = page_path
+      @name = name
+    end
+
+    def ==(other)
+      @file_path == other.file_path && @page_path == other.page_path && @name == other.name
+    end
+  end
+
   module LoaderUtil
     module_function
 
@@ -29,7 +56,7 @@ module Pukiwiki2growi
     def select_page(encoding, top_page, file, *ignore_page)
       bname = File.basename(file, '.*')
       page_path = decode_page_name(encoding, bname)
-      normalize_path('FrontPage', top_page, page_path, ignore_page)
+      normalize_path('FrontPage', top_page, page_path, ignore_page)&.gsub(%r{/+$}, '')
     end
 
     # [page_path, attach_name]
@@ -42,11 +69,8 @@ module Pukiwiki2growi
         nil
       else
         page_path, name = decode_attach_name(encoding, File.basename(file))
-        {
-          file_path: file,
-          page_path: normalize_path('FrontPage', top_page, page_path, ignore_page),
-          name: name
-        }
+        normalized_path = normalize_path('FrontPage', top_page, page_path, ignore_page)
+        Attachment.new(file, normalized_path, name)
       end
     end
   end
@@ -79,7 +103,7 @@ module Pukiwiki2growi
       else
         doc = file_read(file)
         body = LoaderUtil.decode(@encoding, doc)
-        { page_path: page_path, body: body }
+        Page.new(page_path, body)
       end
     end
 

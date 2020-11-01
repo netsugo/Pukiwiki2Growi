@@ -37,6 +37,14 @@ class PukiwikiLoaderTest < Minitest::Test
     testcase.each { |origin, expect| assert_equal expect, normalize(origin) }
   end
 
+  def create_page(page_path, body)
+    Pukiwiki2growi::Page.new(page_path, body)
+  end
+
+  def create_attachment(file_path, page_path, body)
+    Pukiwiki2growi::Attachment.new(file_path, page_path, body)
+  end
+
   def test_load_pages_euc
     dataset = {
       # filename and content
@@ -46,9 +54,9 @@ class PukiwikiLoaderTest < Minitest::Test
       'A5D8A5EBA5D7.txt' => 'ヘルプ'.encode('euc-jp')
     }
     expect = [
-      { page_path: '/Top/', body: 'FrontPage' },
-      { page_path: '/Top/MenuBar', body: 'MenuBar' },
-      { page_path: '/Top/ヘルプ', body: 'ヘルプ' }
+      create_page('/Top', 'FrontPage'),
+      create_page('/Top/MenuBar', 'MenuBar'),
+      create_page('/Top/ヘルプ', 'ヘルプ'),
     ]
     result = MockLoader.new('euc-jp', dataset).load_pages
     assert_equal expect, result
@@ -63,9 +71,9 @@ class PukiwikiLoaderTest < Minitest::Test
       'e38398e383abe38397.txt' => 'ヘルプ'.encode('utf-8')
     }
     expect = [
-      { page_path: '/Top/', body: 'FrontPage' },
-      { page_path: '/Top/MenuBar', body: 'MenuBar' },
-      { page_path: '/Top/ヘルプ', body: 'ヘルプ' }
+      create_page('/Top', 'FrontPage'),
+      create_page('/Top/MenuBar', 'MenuBar'),
+      create_page('/Top/ヘルプ', 'ヘルプ'),
     ]
     result = MockLoader.new('utf-8', dataset).load_pages
     assert_equal expect, result
@@ -77,11 +85,11 @@ class PukiwikiLoaderTest < Minitest::Test
       '54657374A5DAA1BCA5B8_A5B5A5F3A5D7A5EB2E6A7067' => ['Testページ', 'サンプル.jpg']
     }
     expect = [
-      {
-        file_path: '/etc/pukiwiki/attach/54657374A5DAA1BCA5B8_A5B5A5F3A5D7A5EB2E6A7067',
-        page_path: '/Top/Testページ',
-        name: 'サンプル.jpg'
-      }
+      create_attachment(
+        '/etc/pukiwiki/attach/54657374A5DAA1BCA5B8_A5B5A5F3A5D7A5EB2E6A7067',
+        '/Top/Testページ',
+        'サンプル.jpg'
+      )
     ]
     result = MockLoader.new('euc-jp', dataset).list_attachments
     assert_equal expect, result
@@ -93,11 +101,11 @@ class PukiwikiLoaderTest < Minitest::Test
       '54657374e3839ae383bce382b8_e382b5e383b3e38397e383ab2e6a7067' => ['Testページ', 'サンプル.jpg']
     }
     expect = [
-      {
-        file_path: '/etc/pukiwiki/attach/54657374e3839ae383bce382b8_e382b5e383b3e38397e383ab2e6a7067',
-        page_path: '/Top/Testページ',
-        name: 'サンプル.jpg'
-      }
+      create_attachment(
+        '/etc/pukiwiki/attach/54657374e3839ae383bce382b8_e382b5e383b3e38397e383ab2e6a7067',
+        '/Top/Testページ',
+        'サンプル.jpg'
+      )
     ]
     result = MockLoader.new('utf-8', dataset).list_attachments
     assert_equal expect, result

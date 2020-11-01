@@ -46,11 +46,9 @@ bundle install
 
 ## Usage
 
-[migrate.rb](migrate.rb) を実行します。
-
 ```bash
 bundle install
-ruby ./migrate.rb
+rake app
 ```
 
 実行すると、 `log/` 以下に json 形式のログが保存されます。
