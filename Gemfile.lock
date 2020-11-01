@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    pukiwiki2growi (0.3.0)
+    pukiwiki2growi (0.3.1)
       json
       mime-types
       parallel
