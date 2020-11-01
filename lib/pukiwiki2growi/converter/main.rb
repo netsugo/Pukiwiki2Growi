@@ -356,6 +356,7 @@ module Pukiwiki2growi
             {
               '~' => ->(tp, l) { push_paragraph_single(tp, l) },
               ' ' => ->(_, l) { push_preformatted(l) },
+              "\t" => ->(_, l) { push_preformatted(" #{l}") },
               '|' => ->(tp, l) { push_table(tp, l) }
             }
           end

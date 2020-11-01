@@ -81,6 +81,19 @@ class NotationBlockTest < Minitest::Test
     assert_equal expect, actual
   end
 
+  def test_preformat_tab
+    origin = [
+      "\ttest"
+    ].join("\n")
+    expect = [
+      '```',
+      "\ttest",
+      '```'
+    ].join("\n")
+    actual = convert(origin)
+    assert_equal expect, actual
+  end
+
   def test_table_normal
     origin = ['|test|test|test|'].join("\n")
     expect = ['|     |     |     |', '| --- | --- | --- |', '|test|test|test|'].join("\n")
