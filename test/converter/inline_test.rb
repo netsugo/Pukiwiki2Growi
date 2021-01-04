@@ -183,8 +183,8 @@ class NotationInlineTest < Minitest::Test
       '&ref(text1.txt);' => '[text1.txt](text1.txt)',
       '&ref(text2.jpg);' => '![text2.jpg](text2.jpg)',
       '&ref(test3.txt, nolink);' => '[test3.txt](test3.txt)',
-      '&ref(test4.txt, test4);' => '[test4](test4.txt)',
-      '&ref(test5.txt, test5, nolink);' => '[test5,nolink](test5.txt)',
+      '&ref(test4.txt, , test4);' => '[test4](test4.txt)',
+      '&ref(test5.txt, nolink, test5);' => '[test5](test5.txt)',
       '&ref(http://example.com/test6, test6);' => '[test6](http://example.com/test6)'
     }
 
