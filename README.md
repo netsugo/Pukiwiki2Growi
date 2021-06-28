@@ -30,6 +30,7 @@ PukiWiki から GROWI へ移行するためのツールです。
 - LOG_ROOT: ログの出力先を指定します。デフォルトでは、`log/` 以下に出力されます。
 - ENABLE_PROGRESS: `false` にすると、進捗バーの表示を無効化します。
 - ENABLE_LOG: `false` にすると、ログの出力を無効化します。
+- BLACKLIST: ロード時に除外するページを指定します。
 
 ## Usage
 
