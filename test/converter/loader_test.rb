@@ -4,7 +4,7 @@ require_relative '../test_helper'
 
 class MockLoader < Pukiwiki2growi::Loader
   def initialize(encoding, dataset)
-    super('/etc/pukiwiki', encoding, '/Top')
+    super('/etc/pukiwiki', encoding, [], '/Top')
     @dataset = dataset
   end
 
@@ -23,13 +23,14 @@ end
 
 class PukiwikiLoaderTest < Minitest::Test
   def normalize(path)
-    Pukiwiki2growi::LoaderUtil.normalize_path('FrontPage', '/Top/', path, @ignore)
+    @blacklist = ['IgnorePage']
+    Pukiwiki2growi::LoaderUtil.normalize_path('FrontPage', '/Top/', path, @blacklist)
   end
 
   def test_normailze_path
     testcase = {
       'FrontPage' => '/Top/', # '/Top/'
-      #'IgnorePage' => nil,
+      'IgnorePage' => nil,
       ':config' => nil,
       'ExamplePage' => '/Top/ExamplePage'
     }

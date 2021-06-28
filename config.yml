@@ -6,3 +6,31 @@ LOG_ROOT: 'log'
 ENABLE_PROGRESS: true
 ENABLE_LOG: true
 ENCODING: 'UTF-8' # or EUC-JP
+BLACKLIST:
+  - AutoTicketLinkName
+  - Help
+  - InterWiki
+  - InterWikiName
+  - InterWikiSandBox
+  - InterWikiテクニカル
+  - PHP
+  - RecentDeleted
+  - PukiWiki
+  - PukiWiki/1.4
+  - PukiWiki/1.4/Manual
+  - PukiWiki/1.4/Manual/Plugin
+  - PukiWiki/1.4/Manual/Plugin/A-D
+  - PukiWiki/1.4/Manual/Plugin/E-G
+  - PukiWiki/1.4/Manual/Plugin/H-K
+  - PukiWiki/1.4/Manual/Plugin/L-N
+  - PukiWiki/1.4/Manual/Plugin/O-R
+  - PukiWiki/1.4/Manual/Plugin/S-U
+  - PukiWiki/1.4/Manual/Plugin/V-Z
+  - PukiWikiの設定  
+  - SandBox
+  - WikiEngines
+  - WikiName
+  - WikiWikiWeb
+  - YukiWiki
+  - ヘルプ
+  - 整形ルール

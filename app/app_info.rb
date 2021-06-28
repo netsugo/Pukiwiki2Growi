@@ -33,7 +33,7 @@ module App
 
     def initialize(yaml_config)
       config = yaml_config
-      @loader = Pukiwiki2growi::Loader.new(config['PUKIWIKI_DIR'], config['ENCODING'], config['TOP_PAGE'])
+      @loader = Pukiwiki2growi::Loader.new(config['PUKIWIKI_DIR'], config['ENCODING'], config['BLACKLIST'], config['TOP_PAGE'])
       @logger = JsonLogger.new(config['LOG_ROOT'], config['ENABLE_LOG'])
       @client = Pukiwiki2growi::Comm::Client.new(config['URL'], config['API_TOKEN'])
       @is_show_progress = config['ENABLE_PROGRESS']

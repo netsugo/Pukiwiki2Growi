@@ -33,10 +33,10 @@ module Pukiwiki2growi
   module LoaderUtil
     module_function
 
-    def normalize_path(front_page, top_page, path, *ignore)
+    def normalize_path(front_page, top_page, path, blacklist)
       if path == front_page
         File.join(top_page, '')
-      elsif ignore.include?(path) || path.start_with?(':')
+      elsif blacklist.include?(path) || path.start_with?(':')
         nil
       else
         File.join(top_page, path)
@@ -53,10 +53,10 @@ module Pukiwiki2growi
       decode(encoding, path)
     end
 
-    def select_page(encoding, top_page, file, *ignore_page)
+    def select_page(encoding, top_page, file, blacklist)
       bname = File.basename(file, '.*')
       page_path = decode_page_name(encoding, bname)
-      normalize_path('FrontPage', top_page, page_path, ignore_page)&.gsub(%r{/+$}, '')
+      normalize_path('FrontPage', top_page, page_path, blacklist)&.gsub(%r{/+$}, '')
     end
 
     # [page_path, attach_name]
@@ -64,12 +64,12 @@ module Pukiwiki2growi
       str.split('_').map { |s| decode_page_name(encoding, s) }
     end
 
-    def select_attachment(encoding, top_page, file, *ignore_page)
+    def select_attachment(encoding, top_page, file, blacklist)
       if !File.extname(file).empty?
         nil
       else
         page_path, name = decode_attach_name(encoding, File.basename(file))
-        normalized_path = normalize_path('FrontPage', top_page, page_path, ignore_page)
+        normalized_path = normalize_path('FrontPage', top_page, page_path, blacklist)
         Attachment.new(file, normalized_path, name)
       end
     end
@@ -78,13 +78,13 @@ module Pukiwiki2growi
   class Loader
     attr_reader :top_page
 
-    def initialize(pukiwiki_root, encoding, top_page = '/')
+    def initialize(pukiwiki_root, encoding, blacklist, top_page = '/')
       root = File.expand_path(pukiwiki_root)
       @page_root = File.join(root, 'wiki')
       @attach_root = File.join(root, 'attach')
       @top_page = File.join('/', top_page || '')
       @encoding = encoding
-      @ignore = []
+      @blacklist = blacklist || []
     end
 
     def file_read(name)
@@ -97,7 +97,7 @@ module Pukiwiki2growi
     end
 
     def read_page(file)
-      page_path = LoaderUtil.select_page(@encoding, @top_page, file, @ignore)
+      page_path = LoaderUtil.select_page(@encoding, @top_page, file, @blacklist)
       if page_path.nil?
         nil
       else
@@ -115,7 +115,7 @@ module Pukiwiki2growi
 
     def list_attachments
       lsdir(@attach_root, '*')
-        .map { |file| LoaderUtil.select_attachment(@encoding, @top_page, file, @ignore) }
+        .map { |file| LoaderUtil.select_attachment(@encoding, @top_page, file, @blacklist) }
         .compact
     end
   end
